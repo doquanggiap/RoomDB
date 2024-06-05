@@ -63,10 +63,21 @@ fun MainScreen() {
     var showCreateDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
 
-    var updateHoTen by remember { mutableStateOf("") }
-    var updateMSSV by remember { mutableStateOf("") }
-    var updateDiemTB by remember { mutableStateOf("") }
-    var updateDaTotNghiep by remember { mutableStateOf(false) }
+//    var updateHoTen by remember { mutableStateOf("") }
+//    var updateMSSV by remember { mutableStateOf("") }
+//    var updateDiemTB by remember { mutableStateOf("") }
+//    var updateDaTotNghiep by remember { mutableStateOf(false) }
+
+    var updateStudent by remember {
+        mutableStateOf(
+            Student(
+                hoten = "",
+                mssv = "",
+                diemTB = 0f,
+                daTotNghiep = false
+            )
+        )
+    }
 
 
     Column(
@@ -96,10 +107,7 @@ fun MainScreen() {
                     },
                     sua = {
                         showUpdateDialog = true
-                        updateHoTen = student.hoten.toString()
-                        updateMSSV = student.mssv.toString()
-                        updateDiemTB = student.diemTB.toString()
-                        updateDaTotNghiep = student.daTotNghiep!!
+                        updateStudent = student
                     }
 
                 )
@@ -124,10 +132,8 @@ fun MainScreen() {
                 },
                 dialogTitle = "Update Student",
                 db = db,
-                updateHoTen = updateHoTen,
-                updateMSSV = updateMSSV,
-                updateDiemTB = updateDiemTB,
-                updateDaTotNghiep = updateDaTotNghiep
+                student = updateStudent
+
             )
         }
     }
@@ -142,7 +148,6 @@ fun ListItem(
     xoa: () -> Unit = {},
     sua: () -> Unit = {},
 ) {
-//    var showUpdateDialog by remember { mutableStateOf(false) }
 
     Column {
         Row(
@@ -322,19 +327,16 @@ fun UpdateDialog(
     onClick: () -> Unit = {},
     dialogTitle: String = "Cập nhật sinh viên",
     db: StudentDB,
-    updateHoTen: String,
-    updateMSSV: String,
-    updateDiemTB: String,
-    updateDaTotNghiep: Boolean
+    student: Student
 ) {
 
-    var hoten by remember { mutableStateOf(updateHoTen) }
+    var hoten by remember { mutableStateOf(student.hoten) }
 
-    var mssv by remember { mutableStateOf(updateMSSV) }
+    var mssv by remember { mutableStateOf(student.mssv) }
 
-    var diemTB by remember { mutableStateOf(updateDiemTB) }
+    var diemTB by remember { mutableStateOf(student.diemTB) }
 
-    var daTotNghiep by remember { mutableStateOf(updateDaTotNghiep) }
+    var daTotNghiep by remember { mutableStateOf(student.daTotNghiep) }
 
     Dialog(onDismissRequest = {}) {
         Card(
@@ -356,7 +358,7 @@ fun UpdateDialog(
 
                 Column {
                     OutlinedTextField(
-                        value = hoten,
+                        value = hoten.toString(),
                         onValueChange = {
                             hoten = it
                         },
@@ -367,7 +369,7 @@ fun UpdateDialog(
                     Spacer(modifier = Modifier.padding(10.dp))
 
                     OutlinedTextField(
-                        value = mssv,
+                        value = mssv.toString(),
                         onValueChange = {
                             mssv = it
                         },
@@ -378,9 +380,9 @@ fun UpdateDialog(
                     Spacer(modifier = Modifier.padding(10.dp))
 
                     OutlinedTextField(
-                        value = diemTB,
+                        value = diemTB.toString(),
                         onValueChange = {
-                            diemTB = it
+                            diemTB = it.toFloat()
                         },
                         label = { Text("Điểm TB") },
                         placeholder = { Text("Nhập điểm TB") }
@@ -391,16 +393,16 @@ fun UpdateDialog(
                     Row(
                         modifier = Modifier
                             .selectable(
-                                selected = daTotNghiep,
+                                selected = daTotNghiep == true,
                                 onClick = {
-                                    daTotNghiep = !daTotNghiep
+                                    daTotNghiep = !daTotNghiep!!
                                 },
                                 role = Role.Checkbox
                             ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = daTotNghiep,
+                            checked = daTotNghiep == true,
                             onCheckedChange = null
                         )
 
@@ -410,7 +412,14 @@ fun UpdateDialog(
                 }
 
                 Button(onClick = {
+                    val updatedStudent = student.copy(
+                        hoten = hoten,
+                        mssv = mssv,
+                        diemTB = diemTB,
+                        daTotNghiep = daTotNghiep
+                    )
 
+                    db.studentDAO().update(updatedStudent)
                     onClick()
                 }) {
                     Text(text = "Cập nhật")
