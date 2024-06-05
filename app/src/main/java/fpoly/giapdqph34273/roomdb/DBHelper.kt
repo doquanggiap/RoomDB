@@ -6,6 +6,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.Update
 
 @Database(entities = arrayOf(Student::class), version = 1)
 abstract class StudentDB : RoomDatabase() {
@@ -25,4 +26,7 @@ interface StudentDAO {
 
     @Delete
     fun delete(user: Student)
+
+    @Update
+    fun update(user: Student)
 }

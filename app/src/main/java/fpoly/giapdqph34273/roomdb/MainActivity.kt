@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -21,7 +22,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,8 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.room.Room
@@ -73,7 +71,7 @@ fun MainScreen() {
             .safeDrawingPadding()
     ) {
         Text(
-            text = "Quan ly Sinh vien",
+            text = "Quản lý sinh viên",
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -84,23 +82,8 @@ fun MainScreen() {
         }
 
         LazyColumn {
-
-            items(listStudents) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(modifier = Modifier.weight(1f), text = it.uid.toString())
-                    Text(modifier = Modifier.weight(1f), text = it.hoten.toString())
-                    Text(modifier = Modifier.weight(1f), text = it.mssv.toString())
-                    Text(modifier = Modifier.weight(1f), text = it.diemTB.toString())
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = if (it.daTotNghiep == true) "Đã tốt nghiệp" else "Chưa tốt nghiệp"
-                    )
-                }
-                Divider()
+            itemsIndexed(listStudents) { index, student ->
+                ListItem(index, student)
             }
         }
 
@@ -118,7 +101,46 @@ fun MainScreen() {
 
 }
 
-//@Preview(showBackground = true)
+@Composable
+fun ListItem(
+    index: Int,
+    item: Student
+) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (index == 0) "ID" else item.uid.toString()
+            )
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (index == 0) "Họ tên" else item.hoten.toString()
+            )
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (index == 0) "MSSV" else item.mssv.toString()
+            )
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (index == 0) "Điểm TB" else item.diemTB.toString()
+            )
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (index == 0)
+                    "Tình trạng"
+                else if (item.daTotNghiep == true)
+                    "Đã tốt nghiệp"
+                else "Chưa tốt nghiệp"
+            )
+        }
+        Divider()
+    }
+}
+
 @Composable
 fun CreateDialog(
     onClick: () -> Unit = {},
@@ -126,33 +148,20 @@ fun CreateDialog(
     db: StudentDB
 ) {
 
-    var hoten by remember {
-        mutableStateOf("")
-    }
+    var hoten by remember { mutableStateOf("") }
 
-    var mssv by remember {
-        mutableStateOf("")
-    }
+    var mssv by remember { mutableStateOf("") }
 
-    var diemTB by remember {
-        mutableStateOf("")
-    }
+    var diemTB by remember { mutableStateOf("") }
 
-    var daTotNghiep by remember {
-        mutableStateOf(false)
-    }
+    var daTotNghiep by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = {
     }) {
         Card(
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            modifier = Modifier
-                .padding(20.dp),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
-            )
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier.padding(20.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
         ) {
 
             Column(
@@ -165,7 +174,6 @@ fun CreateDialog(
                 )
 
                 Spacer(modifier = Modifier.padding(10.dp))
-
 
                 Column {
                     OutlinedTextField(
@@ -190,7 +198,6 @@ fun CreateDialog(
 
                     Spacer(modifier = Modifier.padding(10.dp))
 
-
                     OutlinedTextField(
                         value = diemTB,
                         onValueChange = {
@@ -201,7 +208,6 @@ fun CreateDialog(
                     )
 
                     Spacer(modifier = Modifier.padding(10.dp))
-
 
                     Row(
                         modifier = Modifier
@@ -237,7 +243,6 @@ fun CreateDialog(
                 }) {
                     Text(text = "Thêm")
                 }
-
 
             }
         }
