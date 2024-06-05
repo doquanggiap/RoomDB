@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -83,7 +84,14 @@ fun MainScreen() {
 
         LazyColumn {
             itemsIndexed(listStudents) { index, student ->
-                ListItem(index, student)
+                ListItem(
+                    index = index,
+                    item = student,
+                    xoa = {
+                        db.studentDAO().delete(student)
+                        listStudents = db.studentDAO().getAll()
+                    }
+                )
             }
         }
 
@@ -101,10 +109,12 @@ fun MainScreen() {
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListItem(
     index: Int,
-    item: Student
+    item: Student,
+    xoa: () -> Unit = {},
 ) {
     Column {
         Row(
@@ -136,6 +146,17 @@ fun ListItem(
                     "Đã tốt nghiệp"
                 else "Chưa tốt nghiệp"
             )
+
+            Card(
+                onClick = xoa,
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Text("Xóa")
+                }
+            }
         }
         Divider()
     }
