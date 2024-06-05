@@ -58,13 +58,16 @@ fun MainScreen() {
         .allowMainThreadQueries()
         .build()
 
-    var listStudents by remember {
-        mutableStateOf(db.studentDAO().getAll())
-    }
+    var listStudents by remember { mutableStateOf(db.studentDAO().getAll()) }
 
-    var showCreateDialog by remember {
-        mutableStateOf(false)
-    }
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+
+    var updateHoTen by remember { mutableStateOf("") }
+    var updateMSSV by remember { mutableStateOf("") }
+    var updateDiemTB by remember { mutableStateOf("") }
+    var updateDaTotNghiep by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -90,7 +93,15 @@ fun MainScreen() {
                     xoa = {
                         db.studentDAO().delete(student)
                         listStudents = db.studentDAO().getAll()
+                    },
+                    sua = {
+                        showUpdateDialog = true
+                        updateHoTen = student.hoten.toString()
+                        updateMSSV = student.mssv.toString()
+                        updateDiemTB = student.diemTB.toString()
+                        updateDaTotNghiep = student.daTotNghiep!!
                     }
+
                 )
             }
         }
@@ -105,6 +116,20 @@ fun MainScreen() {
                 db = db
             )
         }
+        if (showUpdateDialog) {
+            UpdateDialog(
+                onClick = {
+                    showUpdateDialog = false
+                    listStudents = db.studentDAO().getAll()
+                },
+                dialogTitle = "Update Student",
+                db = db,
+                updateHoTen = updateHoTen,
+                updateMSSV = updateMSSV,
+                updateDiemTB = updateDiemTB,
+                updateDaTotNghiep = updateDaTotNghiep
+            )
+        }
     }
 
 }
@@ -115,7 +140,10 @@ fun ListItem(
     index: Int,
     item: Student,
     xoa: () -> Unit = {},
+    sua: () -> Unit = {},
 ) {
+//    var showUpdateDialog by remember { mutableStateOf(false) }
+
     Column {
         Row(
             modifier = Modifier
@@ -158,6 +186,17 @@ fun ListItem(
                         Text("Xóa")
                     }
                 }
+
+                Card(
+                    onClick = sua,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(10.dp)
+                    ) {
+                        Text("Sửa")
+                    }
+                }
             } else {
                 Column(
                     modifier = Modifier.weight(1f),
@@ -186,8 +225,7 @@ fun CreateDialog(
 
     var daTotNghiep by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = {
-    }) {
+    Dialog(onDismissRequest = {}) {
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
             modifier = Modifier.padding(20.dp),
@@ -272,6 +310,110 @@ fun CreateDialog(
                     onClick()
                 }) {
                     Text(text = "Thêm")
+                }
+
+            }
+        }
+    }
+}
+
+@Composable
+fun UpdateDialog(
+    onClick: () -> Unit = {},
+    dialogTitle: String = "Cập nhật sinh viên",
+    db: StudentDB,
+    updateHoTen: String,
+    updateMSSV: String,
+    updateDiemTB: String,
+    updateDaTotNghiep: Boolean
+) {
+
+    var hoten by remember { mutableStateOf(updateHoTen) }
+
+    var mssv by remember { mutableStateOf(updateMSSV) }
+
+    var diemTB by remember { mutableStateOf(updateDiemTB) }
+
+    var daTotNghiep by remember { mutableStateOf(updateDaTotNghiep) }
+
+    Dialog(onDismissRequest = {}) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier.padding(20.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        ) {
+
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = dialogTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+
+                Spacer(modifier = Modifier.padding(10.dp))
+
+                Column {
+                    OutlinedTextField(
+                        value = hoten,
+                        onValueChange = {
+                            hoten = it
+                        },
+                        label = { Text("Họ tên") },
+                        placeholder = { Text("Nhập họ tên") }
+                    )
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    OutlinedTextField(
+                        value = mssv,
+                        onValueChange = {
+                            mssv = it
+                        },
+                        label = { Text("MSSV") },
+                        placeholder = { Text("Nhập MSSV") }
+                    )
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    OutlinedTextField(
+                        value = diemTB,
+                        onValueChange = {
+                            diemTB = it
+                        },
+                        label = { Text("Điểm TB") },
+                        placeholder = { Text("Nhập điểm TB") }
+                    )
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .selectable(
+                                selected = daTotNghiep,
+                                onClick = {
+                                    daTotNghiep = !daTotNghiep
+                                },
+                                role = Role.Checkbox
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = daTotNghiep,
+                            onCheckedChange = null
+                        )
+
+                        Spacer(modifier = Modifier.padding(5.dp))
+                        Text(text = "Đã tốt nghiệp")
+                    }
+                }
+
+                Button(onClick = {
+
+                    onClick()
+                }) {
+                    Text(text = "Cập nhật")
                 }
 
             }
