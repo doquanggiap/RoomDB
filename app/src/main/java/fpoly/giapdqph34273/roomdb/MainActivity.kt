@@ -147,14 +147,23 @@ fun ListItem(
                 else "Chưa tốt nghiệp"
             )
 
-            Card(
-                onClick = xoa,
-                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-            ) {
-                Column(
-                    modifier = Modifier.padding(10.dp)
+            if (index != 0) {
+                Card(
+                    onClick = xoa,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
                 ) {
-                    Text("Xóa")
+                    Column(
+                        modifier = Modifier.padding(10.dp)
+                    ) {
+                        Text("Xóa")
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "CN")
                 }
             }
         }
